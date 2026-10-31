@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,7 +31,10 @@
 
 ## Notes
 
-- Contiene exactamente 3 marcadores `[NEEDS CLARIFICATION]` que serán resueltos en la siguiente fase (`/speckit-clarify`):
-  1. **FR-005**: Orden predeterminado y modo de presentación en CLI (resumen + detalle combinado vs flags separadas).
-  2. **FR-007**: Política de manejo ante filas con sintaxis `,vértice` (rechazo como fila inválida vs aceptación como vértice aislado).
-  3. **FR-008**: Tratamiento de aristas duplicadas (deduplicación silenciosa idempotente vs emisión de aviso informativo en stderr).
+- Clarificaciones completadas e incorporadas formalmente en spec.md (Sesión 2026-10-30).
+- Todos los marcadores resueltos:
+  1. Salida integrada determinista (conteo + vértices + aristas ordenados lexicográficamente) sin flags opcionales.
+  2. Rechazo explícito de filas sin origen `,destino` con código 1; soporte aditivo para `vertice,`.
+  3. Deduplicación silenciosa de aristas con soporte de auto-bucles reflexivos (grafo dirigido con bucles, no multigrafo).
+  4. Normalización observable de espacios en blanco en extremos sin mención a funciones de implementación.
+  5. Recálculo riguroso de conteos para los 3 archivos de prueba oficiales.
