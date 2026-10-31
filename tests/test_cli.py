@@ -24,6 +24,7 @@ def run_cli(*args):
     return res.returncode, res.stdout, res.stderr
 
 
+# Feature 1 inspection tests
 def test_cli_small_dag():
     code, stdout, stderr = run_cli(str(DATA_DIR / "small-dag.csv"))
     assert code == 0
@@ -100,3 +101,50 @@ def test_cli_module_execution_via_package():
     res = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True, env=env)
     assert res.returncode == 0
     assert "Vertices: 9" in res.stdout
+
+
+# Feature 2 topological sort tests
+def test_cli_topo_sort_small_dag():
+    code, stdout, stderr = run_cli(str(DATA_DIR / "small-dag.csv"), "--sort")
+    assert code == 0
+    assert stderr == ""
+    assert "Topological Order:" in stdout
+    lines = [line.strip() for line in stdout.splitlines() if line.strip() and not line.startswith("Topological Order")]
+    assert len(lines) == 9
+    assert lines.index("undershorts") < lines.index("pants")
+    assert lines.index("pants") < lines.index("shoes")
+    assert lines.index("socks") < lines.index("shoes")
+    assert lines.index("shirt") < lines.index("belt")
+    assert lines.index("shirt") < lines.index("tie")
+    assert lines.index("tie") < lines.index("jacket")
+    assert lines.index("belt") < lines.index("jacket")
+    assert "watch" in lines
+
+
+def test_cli_topo_sort_cs_curriculum():
+    code, stdout, stderr = run_cli(str(DATA_DIR / "cs-curriculum.csv"), "--sort")
+    assert code == 0
+    assert stderr == ""
+    assert "Topological Order:" in stdout
+    lines = [line.strip() for line in stdout.splitlines() if line.strip() and not line.startswith("Topological Order")]
+    assert len(lines) == 19
+    assert lines.index("Data Structures") < lines.index("Algorithms")
+    assert lines.index("Algorithms") < lines.index("Compilers")
+
+
+def test_cli_topo_sort_build_with_cycle():
+    code, stdout, stderr = run_cli(str(DATA_DIR / "build-with-cycle.csv"), "--sort")
+    assert code == 1
+    assert stdout == ""
+    assert "Error: Graph contains cycle(s)" in stderr
+    assert "metrics -> metrics" in stderr
+    assert "auth -> session -> user-profile -> auth" in stderr
+    assert "Blocked vertices (not in cycle):" in stderr
+    assert "api" in stderr
+    assert "web" in stderr
+
+
+def test_cli_unknown_option():
+    code, stdout, stderr = run_cli(str(DATA_DIR / "small-dag.csv"), "--invalid")
+    assert code == 2
+    assert "Error: Unknown option" in stderr

@@ -1,5 +1,7 @@
 """Domain exception hierarchy for GraphLab."""
 
+from typing import Any, Optional
+
 
 class GraphLabError(Exception):
     """Base exception for all GraphLab domain errors."""
@@ -25,3 +27,11 @@ class FileAccessError(GraphLabError):
 
     def __init__(self, message: str) -> None:
         super().__init__(message, exit_code=2)
+
+
+class CycleDetectedError(GraphLabError):
+    """Raised when topological sorting cannot be computed due to cycles."""
+
+    def __init__(self, message: str, diagnosis: Optional[Any] = None) -> None:
+        super().__init__(message, exit_code=1)
+        self.diagnosis = diagnosis
