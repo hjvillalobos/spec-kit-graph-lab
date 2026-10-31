@@ -1,50 +1,53 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# GraphLab Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Python 3.11+ y Arquitectura CLI
+- La aplicación debe ser una herramienta de línea de comandos (CLI) desarrollada exclusivamente para Python 3.11+.
+- La entrada de datos se realiza mediante argumentos y/o flujos estándar (`stdin`); los resultados procesados se dirigen a `stdout`; los mensajes de error y advertencias se dirigen a `stderr`.
+- La arquitectura debe ser simple y concisa (KISS / YAGNI), evitando sobreingeniería, abstracciones innecesarias o bibliotecas ajenas a las estrictamente requeridas.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Implementación Propia de Grafos y Algoritmos (Cero Librerías en Producción)
+- Queda terminantemente prohibido el uso de bibliotecas externas o módulos del sistema dedicados a grafos (como `networkx`, `graphlib`, `igraph`, `scipy.sparse.csgraph`, etc.) en el código de producción de la aplicación.
+- Tanto la estructura de datos para representar el grafo en memoria como todos los algoritmos (recorridos, detección de ciclos, adyacencias, ordenamientos) deben ser implementados desde cero por el equipo y fundamentados en los documentos de diseño (`plan.md` y `research.md`).
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Pruebas Exhaustivas y Oráculos de Verificación (NON-NEGOTIABLE)
+- Todo escenario de aceptación definido en una especificación funcional DEBE contar con al menos una prueba automatizada correspondiente.
+- Se adopta la disciplina de desarrollo guiado por pruebas (TDD): los casos de prueba deben definirse y validarse antes de considerar completada la implementación.
+- Se autoriza y recomienda el uso de bibliotecas de grafos reconocidas (como `networkx`) **exclusivamente como oráculos de prueba** dentro de la suite de tests, para verificar matemáticamente que las salidas de la implementación propia sean rigurosamente correctas.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Salidas Deterministas y Manejo Explícito de Errores
+- Para una misma entrada y parámetros idénticos, la aplicación DEBE emitir siempre la misma salida sin fluctuaciones entre ejecuciones ni plataformas.
+- Cuando un algoritmo o consulta admita múltiples resultados válidos (ej. ordenamientos topológicos concurrentes o listado de vértices), la regla de desempate DEBE ser determinista y explícita (p. ej., orden lexicográfico).
+- Cualquier condición anómala o error en los datos de entrada DEBE generar un mensaje comprensible en `stderr` y finalizar con un código de salida distinto de cero (ej. código 1 para datos/formato inválido, código 2 para uso incorrecto de CLI), impidiendo la exposición de trazas de excepción no controladas (`tracebacks`) al usuario final.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Correspondencia Estricta entre Especificación y Código
+- La especificación funcional (`spec.md`) y el código implementado deben coincidir fielmente en todo momento.
+- Si durante la implementación o las pruebas se detecta una discrepancia o necesidad de cambio, debe corregirse primero la especificación antes de modificar el código. Nunca se mantendrá código que contradiga la especificación.
+- Ninguna funcionalidad o comportamiento no documentado debe introducirse en el código.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### VI. Flujo por Ramas y Trazabilidad por Fases
+- Cada funcionalidad debe desarrollarse en su propia rama dedicada (`001-directed-graphs`, `002-topological-sort`) a partir de la rama `main`.
+- La Feature 1 debe ser completamente completada, probada y fusionada (*merged*) en `main` antes de comenzar la especificación de la Feature 2.
+- El historial de Git debe evidenciar con absoluta claridad el avance fase por fase (`specify`, `clarify`, `plan`, `tasks`, `analyze`, `implement`), contando con al menos un commit individual por cada fase de cada funcionalidad.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Additional Constraints & Quality Standards
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+- **Estilo y Tipado**: Código conforme a PEP 8 con anotaciones de tipo (*type hints*) estáticas verificables y docstrings explicativos.
+- **Manejo Robusto de Entrada**: Resistencia ante espacios en blanco accidentales, líneas vacías, codificaciones UTF-8 con o sin BOM (`utf-8-sig`) y formatos CSV imprevistos.
+- **Integración Continua (CI)**: Se mantendrá un flujo de GitHub Actions que ejecute automáticamente la suite completa de pruebas en cada push o solicitud de extracción (*pull request*).
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Development Workflow & Quality Gates
+
+1. **Gate 1 (Specify & Clarify)**: La especificación funcional debe estar completa, con todos los casos de borde y sin marcadores de clarificación pendientes antes de iniciar la planificación.
+2. **Gate 2 (Plan & Research)**: El plan debe justificar la representación de grafos y las complejidades temporal y espacial, comprobando el cumplimiento de las restricciones constitucionales.
+3. **Gate 3 (Tasks & Analyze)**: El desglose de tareas debe cubrir todos los requisitos y pasar el análisis de consistencia sin advertencias críticas o altas sin resolver.
+4. **Gate 4 (Implement & Verify)**: Todo el código debe tener pruebas automatizadas pasando al 100% y ejecutarse satisfactoriamente sobre los conjuntos de datos del laboratorio (`data/`).
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+- Esta constitución representa la ley fundamental del proyecto y prevalece sobre cualquier otra decisión técnica o de proceso.
+- Las enmiendas a este documento deben justificarse explícitamente, versionarse según reglas de versionado semántico y registrarse en el historial de commits.
+- Toda revisión de código, plan o tarea debe validar explícitamente su conformidad con los principios aquí ratificados.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-10-30 | **Last Amended**: 2026-10-30
