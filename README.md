@@ -1,122 +1,313 @@
-# Spec-Driven Development Lab 2: Graphs and Topological Sorting
+# GraphLab — Procesamiento de Grafos de Dependencias y Ordenamiento Topológico
 
-In the first lab you followed a step-by-step guide with ready-made prompts. **This time there are
-no prompts.** You will take a short, incomplete description of a problem and drive the whole
-Spec-Driven Development process yourself: write the constitution, write the specs, find the
-ambiguities, make decisions, review every document, and only then let the agent implement.
+Aplicación de línea de comandos en **Python 3.11+** para la carga, validación, visualización e inspección de grafos dirigidos de dependencias, así como el cálculo de su **ordenamiento topológico determinista** y el diagnóstico exhaustivo de **ciclos dirigidos**.
 
-- Spec Kit: <https://github.com/github/spec-kit>
-- Spec Kit docs: <https://github.github.com/spec-kit/>
-- How to approach this lab: [`docs/APPROACH.md`](docs/APPROACH.md) ← **read this before starting**
+Desarrollada íntegramente mediante la metodología **Spec-Driven Development** con [Spec Kit](https://github.com/github/spec-kit), cumpliendo con la restricción de **cero bibliotecas de grafos en producción** (implementación propia de estructuras y algoritmos).
 
 ---
 
-## Setup
+## Características Principales
 
-Keep using **Spec Kit**, the same way you did in the first lab. You may use **any coding agent
-that Spec Kit supports** (Gemini CLI, GitHub Copilot, Claude Code, Codex, …). Initialize a new
-project with the integration for your agent of choice.
-
-State which agent you used in your `REFLECTION.md`.
-
----
-
-## The problem
-
-Many real systems are graphs of dependencies:
-
-- a university curriculum, where some courses are prerequisites of others;
-- a software build, where packages depend on other packages;
-- a project plan, where some tasks must finish before others start.
-
-You will build a **command-line application in Python** that loads these kinds of dependency
-graphs from a file, displays them, and computes a valid order in which to process them.
-
-The work is split into **two features**, and each one goes through the **full** Spec Kit workflow
-on its own branch.
-
-### Feature 1 — Directed graphs
-
-Users can **load a directed, unweighted graph** from a file and **display it**: its vertices and
-its edges.
-
-That's all the description you get. Everything else (the input format details, how the graph is
-displayed, what happens with unusual or invalid data, what the CLI looks like) is for you to
-specify, clarify and decide.
-
-### Feature 2 — Topological sorting
-
-Users can ask the application for a **topological order** of a loaded graph: an ordering of the
-vertices in which every vertex comes before all the vertices it points to.
-
-This feature **builds on Feature 1**. It is a separate spec, on a separate branch, written after
-Feature 1 is finished and merged.
+* **Implementación Propia de Grafos**: Estructura en memoria de lista de adyacencia optimizada ($O(V + E)$ en espacio y $O(1)$ en operaciones de arista), desarrollada exclusivamente con colecciones nativas de Python.
+* **Ordenamiento Topológico Determinista**: Algoritmo de Kahn asistido por cola de prioridad (min-heap con `heapq`), garantizando resolución determinista de empates en orden alfabético ascendente ($O(V \log V + E)$).
+* **Diagnóstico Preciso de Ciclos**: Identificación de Componentes Fuertemente Conexas (SCC con algoritmo de Tarjan) que diferencia con rigor matemático entre vértices pertenecientes a ciclos y vértices dependientes bloqueados aguas abajo.
+* **Manejo Robusto de Entrada**: Soporte transparente de UTF-8 con y sin BOM (`utf-8-sig`), tolerancia a espacios en blanco periféricos, descarte silencioso de líneas vacías e idempotencia en aristas repetidas.
+* **Oráculos de Verificación**: Suite de pruebas automatizadas que utiliza `networkx` exclusivamente como oráculo de verificación para contrastar la exactitud matemática de los algoritmos propios.
 
 ---
 
-## Sample data
+## Requisitos e Instalación
 
-Three files are provided in [`data/`](data/). Each is a CSV with a header row `source,target`;
-each row is a directed edge from `source` to `target`.
+### Requisitos del Sistema
+* **Python 3.11** o superior (probado en Python 3.11 a 3.14).
+* Sistema operativo: Linux, macOS o Windows.
 
-| File | What it represents |
-|------|--------------------|
-| [`small-dag.csv`](data/small-dag.csv) | Getting dressed in the morning: which garment must be put on before which. Small, for debugging. |
-| [`cs-curriculum.csv`](data/cs-curriculum.csv) | A computer science curriculum: `source` is a prerequisite of `target`. |
-| [`build-with-cycle.csv`](data/build-with-cycle.csv) | Packages in a software project: `source` must be built before `target`. |
+### Instalación
+Clonar el repositorio y situarse en el directorio raíz:
 
-These files reflect real-world data: **look at them carefully**. Not every row is as tidy as it
-first appears, and your specs must say what the application does with everything it can find in
-them. You may create additional data files for your tests.
+```bash
+git clone https://github.com/heifryl/spec-kit-graph-lab.git
+cd spec-kit-graph-lab
+```
 
----
+Para ejecutar la aplicación en producción **no se requiere instalar ninguna dependencia externa** (solo la biblioteca estándar de Python).
 
-## Constraints
+Para ejecutar la suite de pruebas automatizadas y los oráculos:
 
-1. **Python 3.11+**, command-line application.
-2. **Implement the graph and the algorithms yourselves.** Do not use graph libraries
-   (NetworkX, igraph, graph-tool, `graphlib`, `scipy.sparse.csgraph`, …) in the application code.
-   Choosing how to represent the graph is part of your plan, and you must justify it.
-3. **Graph libraries ARE allowed in tests**, as an oracle. For example, you may use NetworkX
-   in a test to check that the order your application produces is a valid topological order.
-   This is how professionals verify algorithm implementations.
-4. **Automated tests are required** for every acceptance scenario in your specs.
-5. Each feature **must go through every phase**: constitution (once, updated if needed) →
-   specify → clarify → plan → tasks → analyze → implement.
-6. **The spec and the code must agree.** If you find a bug, decide whether the code or the spec is
-   wrong. Fix the spec first if needed, then the code. Never leave them disagreeing.
+```bash
+pip install pytest networkx
+```
 
 ---
 
-## Deliverables
+## Uso de la Línea de Comandos (CLI)
 
-Submit a link to your repository (all branches pushed). It must contain:
+La herramienta puede invocarse como módulo ejecutable:
 
-1. `.specify/memory/constitution.md`
-2. `specs/001-*/` and `specs/002-*/`, each with `spec.md` (including a **Clarifications**
-   section), `plan.md`, `research.md`, `data-model.md`, `tasks.md` and any other generated files
-3. The working CLI and its tests, all passing
-4. **A commit history that shows the process**: at least one commit per phase, per feature. A
-   repository with one giant commit will be graded as if the process was skipped.
-5. `REFLECTION.md` (1–2 pages) answering:
-   - Which agent did you use? Did anything about it help or get in the way?
-   - List the clarification questions for each feature and your decisions. Which decision
-     was hardest, and why?
-   - Which unusual things did you find in the sample data, and what does your application do
-     with each one?
-   - How did you represent the graph, and what alternatives did you reject? Did that choice
-     hold up when you got to Feature 2, or did you have to change it?
-   - What did `/speckit.analyze` report for each feature, and what did you change?
-   - Describe one moment where the agent did something different from what you intended. Was
-     the spec ambiguous, or did the agent ignore it?
+```bash
+python -m graphlab <ruta_del_csv> [--sort]
+# En Windows:
+py -m graphlab <ruta_del_csv> [--sort]
+```
 
-> ❌ Do not commit API keys or any other secrets.
+### Opciones
+* `<ruta_del_csv>`: Ruta al archivo CSV con formato `source,target`.
+* `--sort`: *(Opcional)* Solicita el ordenamiento topológico del grafo en lugar de la visualización estructural.
 
 ---
 
-## Optional extension — Feature 3
+## Ejemplos con Conjuntos de Datos Reales
 
-Run a third feature through the full workflow: **weighted graphs with shortest paths
-(Dijkstra)** or **minimum spanning trees (Kruskal/Prim)**. Before you start, ask yourself
-whether your graph representation can support weights without rewriting Features 1 and 2. If it
-can't, what would you change in your plan from Feature 1?
+### 1. Grafo Acíclico Pequeño (`data/small-dag.csv`)
+
+Representa dependencias de vestimenta matutina (CLRS, Fig. 22.7). Contiene **9 vértices** y **9 aristas dirigidas**, incluyendo el vértice aislado `watch`.
+
+#### Visualización Estructural (Feature 1):
+```bash
+py -m graphlab data/small-dag.csv
+```
+**Salida en `stdout`:**
+```text
+Vertices: 9
+Edges: 9
+
+Vertices:
+  belt
+  jacket
+  pants
+  shirt
+  shoes
+  socks
+  tie
+  undershorts
+  watch
+
+Edges:
+  belt -> jacket
+  pants -> belt
+  pants -> shoes
+  shirt -> belt
+  shirt -> tie
+  socks -> shoes
+  tie -> jacket
+  undershorts -> pants
+  undershorts -> shoes
+```
+
+#### Ordenamiento Topológico Determinista (Feature 2):
+```bash
+py -m graphlab data/small-dag.csv --sort
+```
+**Salida en `stdout`:**
+```text
+Topological Order:
+  shirt
+  socks
+  tie
+  undershorts
+  pants
+  belt
+  jacket
+  shoes
+  watch
+```
+
+---
+
+### 2. Plan de Estudios de Ciencias de la Computación (`data/cs-curriculum.csv`)
+
+Representa los prerrequisitos académicos de una carrera universitaria. Contiene **19 cursos únicos** y **23 aristas dirigidas** (la repetición de `Data Structures,Algorithms` se deduplica silenciosamente).
+
+#### Visualización Estructural:
+```bash
+py -m graphlab data/cs-curriculum.csv
+```
+**Salida en `stdout`:**
+```text
+Vertices: 19
+Edges: 23
+
+Vertices:
+  Algorithms
+  Calculus I
+  Calculus II
+  Capstone Project
+  Compilers
+  Computer Architecture
+  Computer Networks
+  Data Structures
+  Databases
+  Discrete Mathematics
+  Distributed Systems
+  Linear Algebra
+  Machine Learning
+  Object-Oriented Programming
+  Operating Systems
+  Probability and Statistics
+  Programming Fundamentals
+  Software Engineering
+  Theory of Computation
+
+Edges:
+  Algorithms -> Compilers
+  Algorithms -> Machine Learning
+  Calculus I -> Calculus II
+  Calculus I -> Linear Algebra
+  Calculus II -> Probability and Statistics
+  Computer Architecture -> Operating Systems
+  Computer Networks -> Distributed Systems
+  Data Structures -> Algorithms
+  Data Structures -> Databases
+  Data Structures -> Operating Systems
+  Databases -> Software Engineering
+  Discrete Mathematics -> Data Structures
+  Discrete Mathematics -> Theory of Computation
+  Distributed Systems -> Capstone Project
+  Linear Algebra -> Machine Learning
+  Object-Oriented Programming -> Data Structures
+  Object-Oriented Programming -> Software Engineering
+  Operating Systems -> Distributed Systems
+  Probability and Statistics -> Machine Learning
+  Programming Fundamentals -> Computer Architecture
+  Programming Fundamentals -> Object-Oriented Programming
+  Software Engineering -> Capstone Project
+  Theory of Computation -> Compilers
+```
+
+#### Ordenamiento Topológico:
+```bash
+py -m graphlab data/cs-curriculum.csv --sort
+```
+**Salida en `stdout`:**
+```text
+Topological Order:
+  Calculus I
+  Calculus II
+  Computer Networks
+  Discrete Mathematics
+  Linear Algebra
+  Probability and Statistics
+  Programming Fundamentals
+  Computer Architecture
+  Object-Oriented Programming
+  Data Structures
+  Algorithms
+  Databases
+  Machine Learning
+  Operating Systems
+  Distributed Systems
+  Software Engineering
+  Capstone Project
+  Theory of Computation
+  Compilers
+```
+
+---
+
+### 3. Grafo con Ciclos de Compilación (`data/build-with-cycle.csv`)
+
+Representa dependencias de módulos de software con interbloqueos circulares. Contiene **11 paquetes** y **13 aristas**, incluyendo un auto-bucle (`metrics -> metrics`) y un ciclo multilateral (`auth -> session -> user-profile -> auth`).
+
+#### Visualización Estructural (Feature 1):
+```bash
+py -m graphlab data/build-with-cycle.csv
+```
+**Salida en `stdout` (Código de salida: 0):**
+```text
+Vertices: 11
+Edges: 13
+
+Vertices:
+  api
+  auth
+  config
+  core
+  logging
+  metrics
+  session
+  storage
+  user-profile
+  utils
+  web
+
+Edges:
+  api -> web
+  auth -> api
+  auth -> session
+  config -> core
+  core -> auth
+  core -> storage
+  logging -> core
+  metrics -> metrics
+  session -> user-profile
+  storage -> api
+  user-profile -> auth
+  utils -> config
+  utils -> logging
+```
+
+#### Diagnóstico de Ciclos al Solicitar Ordenamiento (Feature 2):
+```bash
+py -m graphlab data/build-with-cycle.csv --sort
+```
+**Salida en `stderr` (Código de salida: 1):**
+```text
+Error: Graph contains cycle(s). Topological ordering is not possible.
+Cycles detected:
+  - metrics -> metrics
+  - auth -> session -> user-profile -> auth
+Blocked vertices (not in cycle):
+  - api
+  - web
+```
+
+---
+
+## Códigos de Salida del CLI
+
+| Código | Significado | Ejemplos de Causa |
+| :---: | :--- | :--- |
+| **`0`** | Éxito | Visualización completada u orden topológico generado correctamente en `stdout`. |
+| **`1`** | Error de Validación o Datos | Archivo CSV vacío, cabecera inválida, fila malformada (ej. `,target`), o presencia de ciclos al solicitar `--sort`. |
+| **`2`** | Error de Acceso o Parámetros | Archivo no encontrado, permisos denegados o argumentos de CLI ausentes/inválidos. |
+
+---
+
+## Explicación de Anomalías en los Datos de Muestra
+
+1. **Vértices Aislados (`watch,` en `small-dag.csv`)**:
+   * Línea 11 contiene `watch,` (un origen sin destino).
+   * La aplicación lo reconoce como la declaración de un vértice sin aristas salientes ni entrantes. Se contabiliza en los vértices del grafo sin generar aristas fantasmas.
+2. **Aristas Duplicadas (`Data Structures,Algorithms` en `cs-curriculum.csv`)**:
+   * La relación se repite textualmente en las líneas 11 y 25.
+   * La aplicación deduplica las aristas en tiempo $O(1)$ usando conjuntos matemáticos de forma silenciosa e idempotente, preservando la exactitud del conteo estructural (23 aristas únicas).
+3. **Auto-bucles Reflexivos (`metrics,metrics` en `build-with-cycle.csv`)**:
+   * Línea 14 declara un vértice que depende de sí mismo.
+   * Es una arista válida en Feature 1; en Feature 2, el diagnóstico de ciclos la identifica de inmediato como un ciclo elemental de longitud 1.
+4. **Ciclos vs. Vértices Bloqueados (`build-with-cycle.csv`)**:
+   * `auth -> session -> user-profile -> auth` forman un ciclo cerrado.
+   * Vértices como `api` y `web` no forman parte de ningún ciclo, pero no pueden procesarse porque dependen de `auth`. El analizador de componentes fuertemente conexas (SCC) los distingue con precisión matemática.
+
+---
+
+## Ejecución de Pruebas Automatizadas
+
+La suite incluye 41 pruebas automatizadas que cubren unitarias, integración del CLI y oráculos con NetworkX:
+
+```bash
+# Configurar PYTHONPATH y ejecutar todas las pruebas
+pytest tests/ -v
+```
+
+### Categorías de Pruebas:
+- `tests/test_core.py`: Operaciones in-memory de `DirectedGraph` (adición, deduplicación, bucles, getters ordenados).
+- `tests/test_loader.py`: Casos de borde de CSV (BOM, espacios en blanco, filas sin origen, cabeceras erróneas).
+- `tests/test_algo.py`: Algoritmo de Kahn, min-heap tie-break y Tarjan SCC para aislamiento de ciclos vs bloqueados.
+- `tests/test_cli.py`: Invocación de subprocesos sobre el CLI verificando códigos de salida, `stdout` y `stderr`.
+- `tests/test_oracle.py`: Contrastación formal de conteos y ordenamientos topológicos contra `networkx`.
+
+---
+
+## Integración Continua (CI)
+
+El proyecto cuenta con un flujo automatizado de GitHub Actions configurado en `.github/workflows/ci.yml`, el cual ejecuta la suite de pruebas bajo Python 3.11, 3.12, 3.13 y 3.14 en cada *push* y *pull request*.
