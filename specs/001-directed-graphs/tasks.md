@@ -18,9 +18,9 @@
 
 **Purpose**: Package layout initialization and core error definitions.
 
-- [ ] T001 Create project directories `src/graphlab` and `tests` per implementation plan
-- [ ] T002 [P] Create package initializer and export symbols in `src/graphlab/__init__.py`
-- [ ] T003 [P] Implement domain exception classes (`GraphLabError`, `DataValidationError`, `FileAccessError`) in `src/graphlab/errors.py`
+- [X] T001 Create project directories `src/graphlab` and `tests` per implementation plan
+- [X] T002 [P] Create package initializer and export symbols in `src/graphlab/__init__.py`
+- [X] T003 [P] Implement domain exception classes (`GraphLabError`, `DataValidationError`, `FileAccessError`) in `src/graphlab/errors.py`
 
 ---
 
@@ -28,8 +28,8 @@
 
 **Purpose**: In-memory graph data structure without external graph libraries (blocking prerequisite for all stories).
 
-- [ ] T004 Write unit tests for `DirectedGraph` core operations in `tests/test_core.py` covering vertex addition, edge deduplication, self-loops, counts, and sorted getters
-- [ ] T005 Implement `DirectedGraph` class in `src/graphlab/core.py` using `set[str]` and `dict[str, set[str]]` with $O(V+E)$ space and $O(1)$ edge operations
+- [X] T004 Write unit tests for `DirectedGraph` core operations in `tests/test_core.py` covering vertex addition, edge deduplication, self-loops, counts, and sorted getters
+- [X] T005 Implement `DirectedGraph` class in `src/graphlab/core.py` using `set[str]` and `dict[str, set[str]]` with $O(V+E)$ space and $O(1)$ edge operations
 
 **Checkpoint**: Core graph structure ready and tested. User story tasks can now proceed.
 
@@ -43,12 +43,12 @@
 
 ### Tests for User Story 1
 
-- [ ] T006 [P] [US1] Write unit tests for CSV ingestion and validation in `tests/test_loader.py` covering header checks, isolated vertex `watch,`, deduplicated edges in `cs-curriculum.csv`, and self-loops in `build-with-cycle.csv`
-- [ ] T007 [P] [US1] Write verification oracle tests in `tests/test_oracle.py` comparing `DirectedGraph` vertex and edge counts against `networkx.DiGraph` on all sample datasets in `data/`
+- [X] T006 [P] [US1] Write unit tests for CSV ingestion and validation in `tests/test_loader.py` covering header checks, isolated vertex `watch,`, deduplicated edges in `cs-curriculum.csv`, and self-loops in `build-with-cycle.csv`
+- [X] T007 [P] [US1] Write verification oracle tests in `tests/test_oracle.py` comparing `DirectedGraph` vertex and edge counts against `networkx.DiGraph` on all sample datasets in `data/`
 
 ### Implementation for User Story 1
 
-- [ ] T008 [US1] Implement `CSVLoader` in `src/graphlab/loader.py` with `utf-8-sig` encoding, header validation (`source,target`), whitespace trimming, isolated vertex handling (`u,`), and edge insertion
+- [X] T008 [US1] Implement `CSVLoader` in `src/graphlab/loader.py` with `utf-8-sig` encoding, header validation (`source,target`), whitespace trimming, isolated vertex handling (`u,`), and edge insertion
 
 **Checkpoint**: User Story 1 is functional and verifiable against the `networkx` test oracle.
 
@@ -62,11 +62,11 @@
 
 ### Tests for User Story 2
 
-- [ ] T009 [P] [US2] Write CLI integration tests in `tests/test_cli.py` asserting sorted stdout format (`Vertices: N`, `Edges: M`, vertex list, edge list) on sample files
+- [X] T009 [P] [US2] Write CLI integration tests in `tests/test_cli.py` asserting sorted stdout format (`Vertices: N`, `Edges: M`, vertex list, edge list) on sample files
 
 ### Implementation for User Story 2
 
-- [ ] T010 [US2] Implement CLI argument parsing, runner function, and formatted stdout presentation in `src/graphlab/cli.py`
+- [X] T010 [US2] Implement CLI argument parsing, runner function, and formatted stdout presentation in `src/graphlab/cli.py`
 
 **Checkpoint**: User Stories 1 and 2 deliver the complete MVP workflow.
 
@@ -80,11 +80,11 @@
 
 ### Tests for User Story 3
 
-- [ ] T011 [P] [US3] Write negative scenario integration tests in `tests/test_cli.py` for non-existent files (code 2), empty files (code 1), invalid headers (code 1), and missing source `,target` (code 1)
+- [X] T011 [P] [US3] Write negative scenario integration tests in `tests/test_cli.py` for non-existent files (code 2), empty files (code 1), invalid headers (code 1), and missing source `,target` (code 1)
 
 ### Implementation for User Story 3
 
-- [ ] T012 [US3] Implement error trapping and exit code mapping in `src/graphlab/cli.py` ensuring exceptions produce clean messages in `stderr` without tracebacks
+- [X] T012 [US3] Implement error trapping and exit code mapping in `src/graphlab/cli.py` ensuring exceptions produce clean messages in `stderr` without tracebacks
 
 **Checkpoint**: All user stories complete with positive and negative testing.
 
@@ -94,8 +94,8 @@
 
 **Purpose**: Cross-cutting validation, documentation alignment, and execution checks.
 
-- [ ] T013 [P] Execute CLI manually against `data/small-dag.csv`, `data/cs-curriculum.csv`, and `data/build-with-cycle.csv` verifying against `quickstart.md`
-- [ ] T014 Run complete test suite via `pytest` ensuring 100% test pass rate across unit, integration, and oracle test suites
+- [X] T013 [P] Execute CLI manually against `data/small-dag.csv`, `data/cs-curriculum.csv`, and `data/build-with-cycle.csv` verifying against `quickstart.md`
+- [X] T014 Run complete test suite via `pytest` ensuring 100% test pass rate across unit, integration, and oracle test suites
 
 ---
 
