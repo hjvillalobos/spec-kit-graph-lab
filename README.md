@@ -26,7 +26,7 @@ Desarrollada íntegramente mediante la metodología **Spec-Driven Development** 
 Clonar el repositorio y situarse en el directorio raíz:
 
 ```bash
-git clone https://github.com/heifryl/spec-kit-graph-lab.git
+git clone https://github.com/hjvillalobos/spec-kit-graph-lab.git
 cd spec-kit-graph-lab
 ```
 
