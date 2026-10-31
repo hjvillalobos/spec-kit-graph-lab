@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Spec Kit local runtime files (see .specify/.gitignore)
+.specify/feature.json
+.specify/integrations/packages/
+.specify/integrations/packages.json
+
+# Operating System and IDEs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
