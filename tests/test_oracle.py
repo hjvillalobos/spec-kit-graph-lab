@@ -1,10 +1,12 @@
-"""Oracle tests using NetworkX to verify custom graph correctness."""
+"""Oracle tests using NetworkX to verify custom graph correctness and topological sort."""
 
 import pytest
 import csv
 from pathlib import Path
 import networkx as nx
 from graphlab.loader import CSVLoader
+from graphlab.algo import TopologicalSorter
+from graphlab.errors import CycleDetectedError
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = REPO_ROOT / "data"
@@ -46,3 +48,49 @@ def test_oracle_matches_networkx(filename):
     # 3. Verify ordering is lexicographical
     assert custom_graph.get_vertices() == sorted(list(nx_graph.nodes()))
     assert custom_graph.get_edges() == sorted(list(nx_graph.edges()))
+
+
+@pytest.mark.parametrize("filename", ["small-dag.csv", "cs-curriculum.csv"])
+def test_oracle_topological_sort_validity(filename):
+    """Verify that TopologicalSorter produces a mathematically valid topological sort."""
+    file_path = DATA_DIR / filename
+    custom_graph = CSVLoader.load_from_path(file_path)
+    nx_graph = load_networkx_graph(file_path)
+
+    # Verify that NetworkX confirms it is indeed a DAG
+    assert nx.is_directed_acyclic_graph(nx_graph)
+
+    # Compute custom sort
+    order = TopologicalSorter.sort(custom_graph)
+    assert len(order) == custom_graph.vertex_count()
+
+    # Map each vertex to its position in the produced order
+    pos = {v: i for i, v in enumerate(order)}
+
+    # For every edge (u, v), u MUST precede v (pos[u] < pos[v])
+    for u, v in nx_graph.edges():
+        assert pos[u] < pos[v], f"Topological violation: '{u}' (pos {pos[u]}) must precede '{v}' (pos {pos[v]})"
+
+
+def test_oracle_cycle_detection_on_build_with_cycle():
+    """Verify cycle detection and blocked node classification against NetworkX."""
+    file_path = DATA_DIR / "build-with-cycle.csv"
+    custom_graph = CSVLoader.load_from_path(file_path)
+    nx_graph = load_networkx_graph(file_path)
+
+    # NetworkX confirms graph is not a DAG
+    assert not nx.is_directed_acyclic_graph(nx_graph)
+
+    with pytest.raises(CycleDetectedError) as exc_info:
+        TopologicalSorter.sort(custom_graph)
+
+    diag = exc_info.value.diagnosis
+    assert diag is not None
+
+    # Cycle participants in build-with-cycle.csv
+    expected_cycle_nodes = {"auth", "session", "user-profile", "metrics"}
+    assert diag.cycle_vertices == expected_cycle_nodes
+
+    # Blocked nodes that depend on auth but are not in any cycle
+    expected_blocked_nodes = {"api", "web"}
+    assert diag.blocked_vertices == expected_blocked_nodes
